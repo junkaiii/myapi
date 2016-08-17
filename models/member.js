@@ -27,11 +27,12 @@ var memberSchema = new mongoose.Schema( {
       }
     }
   },
-  created_at: {
-    type: Date,
-    default: Date.now
-  }
-});
+},
+{
+  timestamps: {}
+}
+
+);
 
 // setting up a virtual attribute
 memberSchema.virtual('fullName').get(function(){
