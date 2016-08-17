@@ -13,6 +13,9 @@ var memberSchema = new mongoose.Schema( {
     type: String,
     trim: true
   },
+  password: {
+    type: String
+  },
   website: {
     type: String,
     trim: true,

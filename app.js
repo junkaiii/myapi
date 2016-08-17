@@ -36,35 +36,60 @@ app.route('/members')
       res.json(members);
     });
   })
-  .post(function(req, res, next){
+  .post(function(req, res, next) {
     var new_member = new Member(req.body);
-    new_member.save(function(err){
-      if(err) return next(err);
+    new_member.save(function(err) {
+      if (err) return next(err);
       res.json(new_member);
     });
   });
 
-  app.route('/actors/:actor_id')
-    .get( function (req, res, next) {
-      var member_id = req.params.member_id;
-      Actor.findOne({
-        _id: actor_id
-      }, function (err, member) {
-        if(err) return next(err);
+app.route('/members/:member_id')
+  .get(function(req, res, next) {
+    var member_id = req.params.member_id;
+    Actor.findOne({
+      _id: member_id
+    }, function(err, member) {
+      if (err) return next(err);
 
-        res.json(member);
-      }
-    );
+      res.json(member);
+    });
   })
-  .put( function(req, res, next) {
-  var member_id = req.params.member_id;
+  .put(function(req, res, next) {
+    var member_id = req.params.member_id;
 
-  Member.findByIdAndUpdate( member_id, req.body, function(err, actor) {
-    if(err) return next(err);
+    Member.findByIdAndUpdate(member_id, req.body, function(err, actor) {
+      if (err) return next(err);
 
-    res.json(member);
+      res.json(member);
+    });
   });
-});
+
+  // signup route
+  app.post('/signup', function(req, res) {
+    // set var for the posted requests
+    var member_object = req.body;
+    // set new User object
+    var new_member = new Member(member_object);
+    // save new User object
+    new_user.save(function(err, user) {
+      if (err) return res.status(400).send(err);
+      return res.status(200).send({
+        message: 'User Created'
+      });
+    });
+  });
+
+  //login route
+  app.post('/login', function(req, res) {
+    // res.send('login here');
+    var member_object = req.body;
+    console.log(member_object.email);
+    Member.findOne({ email: req.body.email, password: req.body.password }, function(err, member) {
+      if (err) return res.status(400).send('Invalid request');
+      return res.status(200).send(member);
+    });
+  });
 
 //Selecting Ports
 app.set('port', (process.env.PORT || 7000));
