@@ -2,9 +2,12 @@
 var express = require('express');
 var expressLayouts = require('express-ejs-layouts');
 var bodyParser = require('body-parser');
+var expressJWT = require('express-jwt');
+var jwt = require('jsonwebtoken');
 var app = express();
 
 //loading mongoose
+var jwt_secret = 'supercalifragilisticexpialidocious';
 var mongo_url = process.env.MONGODB_URI || 'mongodb://localhost/mymdb_db';
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -80,15 +83,44 @@ app.route('/members/:member_id')
     });
   });
 
+  // //login route
+  // app.post('/login', function(req, res) {
+  //   // res.send('login here');
+  //   var member_object = req.body;
+  //   console.log(member_object.email);
+  //   Member.findOne({ email: req.body.email, password: req.body.password }, function(err, member) {
+  //     if (err) return res.status(400).send('Invalid request');
+  //     return res.status(200).send(member);
+  //   });
+  // });
+
   //login route
-  app.post('/login', function(req, res) {
-    // res.send('login here');
-    var member_object = req.body;
-    console.log(member_object.email);
-    Member.findOne({ email: req.body.email, password: req.body.password }, function(err, member) {
-      if (err) return res.status(400).send('Invalid request');
-      return res.status(200).send(member);
-    });
+  app.post('/login', function(req, res){
+    var loggedin_member = req.body;
+
+    Member.findOne(
+      loggedin_member, //must requested object match all the parameters in the database?
+      function(err, found_member) {
+        if (err) return res.status(400).send(err);
+
+        if (found_member) {
+          var payload = {
+            id: found_member.id,
+            email: found_member.email
+          };
+          var expiryObj = {
+            exp: 60 * 3 //what does this mean?
+          };
+          console.log (payload, expiryObj, jwt_secret);
+          var jwt_token = jwt.sign(payload, jwt_secret, { expiresIn : 60*3 });
+          return res.status(200).send(jwt_token); //why do we want to return the token? whats the use?
+        } else {
+          return res.status(400).send({
+            message: 'login failed'
+          });
+        }
+      }
+    );
   });
 
 //Selecting Ports
